@@ -14,22 +14,24 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.lest.jsp.service.MenuService;
-import com.lest.jsp.service.impl.MenuServiceImpl;
+import org.apache.log4j.Logger;
 
-/**
- * Servlet implementation class JspServlet
- */
+import com.lest.jsp.factory.ServiceFactory;
+import com.lest.jsp.service.MenuService;
+import com.lest.jsp.service.UserService;
+import com.lest.jsp.service.impl.MenuServiceImpl;
+import com.lest.jsp.util.URIParser;
+
+
+
 @WebServlet("/view/*")
 public class JspServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
+	private ServiceFactory sf = ServiceFactory.getInstance();
+	private static Logger log = Logger.getLogger(JspServlet.class);	
     public JspServlet() {
         super();
-        // TODO Auto-generated constructor stub
+       
     }
 
 	/**
@@ -48,11 +50,21 @@ public class JspServlet extends HttpServlet {
 	}
 	
 	public void doprocess(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-	//	PrintWriter out = res.getWriter();
-		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/view/index.jsp");
-		MenuService ms = new MenuServiceImpl();
-		ms.getMenuList(req);	
+		String uri = req.getRequestURI();
+		log.debug(uri);
+		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF" + uri + ".jsp");
+		if(req.getServletContext().getAttribute("menuList")==null) {
+			MenuService ms = (MenuService)sf.getService("menu");
+			ms.getMenuList(req);		
+		}
+		String command = URIParser.getCommand(uri, 1);
+		log.debug(command);
+		if(command.equals("list")) {
+			uri = uri.replaceAll("/" + command,"");
+			command = URIParser.getCommand(uri, 1);
+			UserService s = (UserService)sf.getService(command);
+			s.getUserList(req);
+		}
 		rd.forward(req,res);
-	//	out.println(req.getParameter("test"));
 	}
 }
