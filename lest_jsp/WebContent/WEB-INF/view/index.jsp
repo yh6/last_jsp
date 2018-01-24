@@ -20,7 +20,8 @@
 ${m.mNum}, ${m.mUrl}, ${m.mName}, ${m.mDesc} <br>
 </c:forEach>
 
-
+전 인덱스 파일입니다. <br>
+무슨 짓을 하건 저만 보입니다.<br>
 
 </body>
 </html>
